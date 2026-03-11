@@ -39,7 +39,6 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # ----------------------------------------------------
 
 def _send_email(to_address, subject, body):
-    """Generic SMTP helper — all emails go through here."""
     msg = MIMEMultipart()
     msg["From"]    = EMAIL_SENDER
     msg["To"]      = to_address
@@ -47,15 +46,14 @@ def _send_email(to_address, subject, body):
     msg.attach(MIMEText(body, "plain"))
 
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
+        # Use SMTP_SSL on port 465 instead of STARTTLS on 587
+        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
         server.login(EMAIL_SENDER, EMAIL_PASSWORD)
         server.sendmail(EMAIL_SENDER, to_address, msg.as_string())
         server.quit()
         print(f"✅ Email sent to {to_address}")
     except Exception as e:
         print(f"❌ Email to {to_address} failed:", e)
-
 
 def send_thank_you_email(user_email, user_name, dance_style):
     """Sent to student after enrollment — runs in background thread."""
