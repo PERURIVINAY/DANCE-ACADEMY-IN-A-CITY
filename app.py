@@ -41,7 +41,8 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # ----------------------------------------------------
 
 
-resend.api_key = "re_bo7FaHuo_5e7YPSnZmd1nmKNjwMAcy4WH"  # ← mee API key ikkada
+# ikkada change cheyyandi
+resend.api_key = os.environ.get("re_4YCNtaZw_EooMdt5cGjzokW9jWYBGNMpe")
 
 def _send_email(to_address, subject, body):
     try:
