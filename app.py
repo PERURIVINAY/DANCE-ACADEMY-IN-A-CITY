@@ -5,6 +5,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
+import threading
 
 # -----------------------------
 # SUPABASE CONFIG
@@ -37,8 +38,27 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # EMAIL HELPERS
 # ----------------------------------------------------
 
+def _send_email(to_address, subject, body):
+    """Generic SMTP helper — all emails go through here."""
+    msg = MIMEMultipart()
+    msg["From"]    = EMAIL_SENDER
+    msg["To"]      = to_address
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+        server.sendmail(EMAIL_SENDER, to_address, msg.as_string())
+        server.quit()
+        print(f"✅ Email sent to {to_address}")
+    except Exception as e:
+        print(f"❌ Email to {to_address} failed:", e)
+
+
 def send_thank_you_email(user_email, user_name, dance_style):
-    """Sent to student after enrollment."""
+    """Sent to student after enrollment — runs in background thread."""
     subject = "🎉 Welcome to Elite Dance Academy!"
     body = f"""
 Hi {user_name},
@@ -53,12 +73,16 @@ Keep Dancing!
 
 Elite Dance Academy
 """
-    _send_email(user_email, subject, body)
+    threading.Thread(
+        target=_send_email,
+        args=(user_email, subject, body),
+        daemon=True
+    ).start()
 
 
 def send_mentor_request_email(user_email, user_name, message):
     """
-    Two emails:
+    Two emails sent in background threads:
       1. Confirmation to the person who filled the form.
       2. Internal notification to the academy inbox.
     """
@@ -78,7 +102,11 @@ See you on the dance floor! 🕺
 
 Elite Dance Academy
 """
-    _send_email(user_email, user_subject, user_body)
+    threading.Thread(
+        target=_send_email,
+        args=(user_email, user_subject, user_body),
+        daemon=True
+    ).start()
 
     # --- Internal alert to academy ---
     admin_subject = f"📩 New Mentor Request from {user_name}"
@@ -92,26 +120,11 @@ Message : {message}
 Log in to Supabase to view all requests:
 https://app.supabase.com
 """
-    _send_email(EMAIL_SENDER, admin_subject, admin_body)
-
-
-def _send_email(to_address, subject, body):
-    """Generic SMTP helper — all emails go through here."""
-    msg = MIMEMultipart()
-    msg["From"]    = EMAIL_SENDER
-    msg["To"]      = to_address
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
-
-    try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(EMAIL_SENDER, EMAIL_PASSWORD)
-        server.sendmail(EMAIL_SENDER, to_address, msg.as_string())
-        server.quit()
-        print(f"✅ Email sent to {to_address}")
-    except Exception as e:
-        print(f"❌ Email to {to_address} failed:", e)
+    threading.Thread(
+        target=_send_email,
+        args=(EMAIL_SENDER, admin_subject, admin_body),
+        daemon=True
+    ).start()
 
 
 # ----------------------------------------------------
@@ -133,7 +146,7 @@ def test_supabase():
 
 
 # ----------------------------------------------------
-# ENROLL ROUTE  (existing — unchanged)
+# ENROLL ROUTE
 # ----------------------------------------------------
 @app.route("/enroll", methods=["POST"])
 def enroll():
@@ -177,7 +190,7 @@ def enroll():
             "user_id":          user.id
         }).execute()
 
-        # 5️⃣ Send confirmation email
+        # 5️⃣ Send confirmation email (non-blocking)
         send_thank_you_email(data.get("email"), data.get("name"), data.get("dance_style"))
 
         return jsonify({"message": "Enrollment successful!", "data": response.data}), 201
@@ -188,7 +201,7 @@ def enroll():
 
 
 # ----------------------------------------------------
-# NEW: MENTOR REQUEST ROUTE
+# MENTOR REQUEST ROUTE
 # ----------------------------------------------------
 @app.route("/mentor-request", methods=["POST"])
 def mentor_request():
@@ -220,7 +233,7 @@ def mentor_request():
             "message": message
         }).execute()
 
-        # 5️⃣ Send emails (confirmation + internal alert)
+        # 5️⃣ Send emails (non-blocking)
         send_mentor_request_email(email, name, message)
 
         return jsonify({
@@ -233,10 +246,8 @@ def mentor_request():
 
 
 # ----------------------------------------------------
-# RUN SERVER
+# RUN SERVER  ← FIX: reads PORT from environment (required by Render)
 # ----------------------------------------------------
 if __name__ == "__main__":
-    app.run(
-    host="0.0.0.0",
-    port=5000
-)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
