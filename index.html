@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Dance Academy | Passion & Performance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --neon-pink: #ff007f; --neon-cyan: #00f2ff; --dark-bg: #050505; }
+         body {
+    background-image: url('/static/red-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+
+    color: white;
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+}
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(5,5,5,0.75);
+    z-index: -1;
+}
+
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-neon { background: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); transition: 0.3s; border: none; cursor: pointer; }
+        .btn-neon:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--neon-pink); }
+      .dance-card {
+    background: linear-gradient(145deg, #0f0f15, #08080c);
+    border-bottom: 4px solid var(--accent);
+    transition: all 0.35s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.dance-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, var(--accent) 0%, transparent 70%);
+    opacity: 0.12;        /* ← always visible (was 0) */
+    transition: 0.35s;
+}
+
+.dance-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px -10px var(--accent);
+}
+
+.dance-card:hover::before {
+    opacity: 0.28;        /* ← brighter on hover (was 0.15) */
+}
+       
+        .marquee-track { display: flex; gap: 24px; animation: marquee 30s linear infinite; width: max-content; }
+.marquee-track:hover { animation-play-state: paused; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .hidden { display: none; }
+        input, select, textarea { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; width: 100%; }
+        select option { background: #121217; color: white; }
+        .btn-google { background: white; color: #1f1f1f; border: none; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 13px; }
+        .btn-google:hover { background: #f0f0f0; transform: scale(1.02); }
+        #user-avatar { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--neon-cyan); object-fit: cover; }
+        #user-display { display: flex; align-items: center; gap: 10px; }
+        #user-name { font-size: 12px; font-weight: 700; color: #00f2ff; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #auth-gate { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.96); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; }
+        #auth-gate.hidden { display: none; }
+        .preload-images {
+    position: absolute;
+    width: 0; height: 0;
+    overflow: hidden;
+    background-image:
+      url('/static/bharatanatyam.jpeg'),
+      url('/static/hiphop.jpeg'),
+      url('/static/kathak.jpeg'),
+      url('/static/salsa.png'),
+      url('/static/contemporary.png'),
+      url('/static/ballet.png'),
+      url('/static/western.jpeg'),
+      url('/static/kuchipudi.png'),
+      url('/static/freestyle.jpeg');
+  }
+  .glass {
+background: rgba(0,0,0,0.45);
+backdrop-filter: blur(8px);
+border: 1px solid rgba(255,255,255,0.08);
+}
+#testimonials{
+    background-image: url('/static/community-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+#testimonials::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.75);
+    z-index:0;
+}
+/* Classical styles */
+.accent-bharatanatyam { --accent:#ff2d95; }
+.accent-kathak { --accent:#22c55e; }
+.accent-kuchipudi { --accent:#f97316; }
+
+/* Street styles */
+.accent-hiphop { --accent:#00e5ff; }
+.accent-freestyle { --accent:#6366f1; }
+
+/* Stage styles */
+.accent-ballet { --accent:#60a5fa; }
+.accent-contemporary { --accent:#a855f7; }
+.accent-western { --accent:#eab308; }
+
+/* Latin */
+.accent-salsa { --accent:#ef4444; }
+       
+        /* Dance Card Background Images */
+    </style>
+</head>
+<body>
+    <div class="preload-images"></div>
+
+<div id="auth-gate" class="hidden">
+    <div class="glass p-10 rounded-[2rem] max-w-sm w-full text-center space-y-6">
+        <h2 class="text-3xl font-black italic text-cyan-400">Sign In to Enroll</h2>
+        <p class="text-gray-400 text-sm">Create your academy account to reserve your spot and track your journey.</p>
+        <button onclick="signInFromGate()" class="btn-google w-full py-4 rounded-xl justify-center">
+            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.2 0 5.9 1.1 8.1 2.9l6-6C34.5 3.1 29.6 1 24 1 14.8 1 7 6.7 3.7 14.6l7 5.4C12.4 14 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.4 5.7c4.3-4 6.8-9.9 7.2-16.9z"/><path fill="#FBBC05" d="M10.7 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7-5.4A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l8.1-6.1z"/><path fill="#34A853" d="M24 47c5.9 0 10.9-2 14.5-5.3l-7.4-5.7c-2 1.4-4.6 2.2-7.1 2.2-6.3 0-11.7-4.3-13.7-10.1l-8.1 6.1C7 41.3 14.9 47 24 47z"/></svg>
+            Continue with Google
+        </button>
+        <button onclick="document.getElementById('auth-gate').classList.add('hidden')" class="text-gray-500 text-xs hover:text-white transition">Cancel</button>
+    </div>
+</div>
+
+<nav class="fixed w-full z-50 glass px-6 py-4 flex justify-between items-center">
+    <h1 class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-cyan-400">ELITE DANCE</h1>
+    <div class="hidden md:flex space-x-8 font-bold text-xs uppercase tracking-widest">
+        <a href="#about" class="hover:text-cyan-400 transition">About</a>
+        <a href="#courses" class="hover:text-cyan-400 transition">Classes</a>
+        <a href="#testimonials" class="hover:text-cyan-400 transition">Reviews</a>
+        <a href="#contact" class="hover:text-cyan-400 transition">Contact</a>
+    </div>
+    <div id="auth-area">
+        <div id="login-btn-wrap">
+            <button onclick="signInWithGoogle()" class="btn-google px-5 py-2 rounded-full text-xs">
+                <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.2 0 5.9 1.1 8.1 2.9l6-6C34.5 3.1 29.6 1 24 1 14.8 1 7 6.7 3.7 14.6l7 5.4C12.4 14 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.4 5.7c4.3-4 6.8-9.9 7.2-16.9z"/><path fill="#FBBC05" d="M10.7 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7-5.4A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l8.1-6.1z"/><path fill="#34A853" d="M24 47c5.9 0 10.9-2 14.5-5.3l-7.4-5.7c-2 1.4-4.6 2.2-7.1 2.2-6.3 0-11.7-4.3-13.7-10.1l-8.1 6.1C7 41.3 14.9 47 24 47z"/></svg>
+                Sign In
+            </button>
+        </div>
+        <div id="user-display" class="hidden">
+            <img id="user-avatar" src="" alt="avatar">
+            <span id="user-name"></span>
+            <button onclick="signOut()" class="text-[10px] text-gray-500 hover:text-red-400 transition font-bold uppercase ml-2">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<section class="relative h-[100vh] flex flex-col justify-center items-center text-center px-4 overflow-hidden">
+    <!-- Background image layer -->
+    <div class="absolute inset-0 z-0">
+        <img src="/static/hero-dance.jpg" alt="Hero Dance" class="w-full h-full object-cover object-center">
+        <!-- Gradient overlay: transparent top → solid dark bottom (blends into page) -->
+        <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(5,5,5,0.3) 0%, rgba(5,5,5,0.6) 60%, rgba(5,5,5,1) 100%);"></div>
+    </div>
+    <!-- Text content sits above the image -->
+    <div class="relative z-10">
+        <h2 class="text-6xl md:text-8xl font-black mb-4 italic animate__animated animate__fadeIn">ELITE <span class="text-cyan-400">STUDIOS</span></h2>
+        <p class="text-gray-300 max-w-xl mb-8 text-lg">Master the art of movement. 9 world-class styles, 1 destination.</p>
+        <a href="#courses" class="btn-neon px-10 py-4 rounded-full font-black uppercase tracking-widest">our dance styles</a>
+    </div>
+</section>
+
+<section id="about" class="py-20 px-6 max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="glass p-10 rounded-[2.5rem]">
+            <h3 class="text-4xl font-black mb-6 italic text-pink-500">The Legacy</h3>
+            <p class="text-gray-400 mb-6 leading-relaxed">Elite Dance Academy isn't just a studio; it's a movement lab. Since 2010, we've trained over 5,000 dancers, from Broadway performers to competitive champions. We bridge the gap between traditional heritage and modern street culture.</p>
+            <div class="flex gap-8">
+                <div><h4 class="text-3xl font-black text-cyan-400">15+</h4><p class="text-[10px] uppercase text-gray-500">Master Trainers</p></div>
+                <div><h4 class="text-3xl font-black text-pink-500">22</h4><p class="text-[10px] uppercase text-gray-500">National Awards</p></div>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-3xl font-black mb-4 uppercase">Why Choose <span class="text-cyan-400">Elite?</span></h3>
+            <div class="glass p-5 rounded-xl border-l-4 border-pink-500"><b>Professional Stage Exposure:</b> Quarterly showcases in city theaters.</div>
+            <div class="glass p-5 rounded-xl border-l-4 border-cyan-400"><b>Global Certification:</b> Recognized credits for international academies.</div>
+            <div class="glass p-5 rounded-xl border-l-4 border-purple-500"><b>Industry Connection:</b> Direct scouting by top choreographers.</div>
+        </div>
+    </div>
+</section>
+
+<section id="courses" class="py-20 px-6 bg-black/40">
+    <div class="max-w-7xl mx-auto">
+        <h2 class="text-center text-4xl font-black mb-12 italic uppercase">The <span class="text-cyan-400">Curriculum</span></h2>
+        <div id="dance-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    </div>
+</section>
+</section>
+
+<!-- TESTIMONIALS SECTION START -->
+<!-- Testimonials Section -->
+<!-- ── TESTIMONIALS ─────────────────────────────────── -->
+<section id="testimonials" class="py-24 px-6 overflow-hidden">
+
+    <div class="max-w-7xl mx-auto relative z-10">
+
+        <h2 class="text-center text-4xl font-black mb-2 italic uppercase">What Our <span class="text-pink-500">Dancers</span> Say</h2>
+        <p class="text-center text-gray-500 text-sm mb-14 uppercase tracking-widest">Real students. Real journeys.</p>
+
+        <!-- Marquee Row 1 -->
+        <div class="overflow-hidden mb-6">
+            <div class="marquee-track">
+                <!-- First set -->
+                <div class="glass p-6 rounded-2xl border-l-4 border-pink-500 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Elite Dance completely transformed me. The Bharatanatyam training is unmatched in the city."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ff007f,#a855f7)">P</div><p class="text-xs font-bold text-white">Priya Nair <span class="text-gray-600 font-normal">· Bharatanatyam</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-cyan-400 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"The Hip Hop classes are FIRE. I placed top 3 in my very first battle."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#00f2ff,#3b82f6)">A</div><p class="text-xs font-bold text-white">Arjun Mehta <span class="text-gray-600 font-normal">· Hip Hop</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-purple-500 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Contemporary became my therapy. I've never felt stronger or more expressive."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#a855f7,#f97316)">S</div><p class="text-xs font-bold text-white">Sneha Kulkarni <span class="text-gray-600 font-normal">· Contemporary</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-orange-500 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★☆</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Salsa nights at Elite are legendary. Now we compete at the state level."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ef4444,#eab308)">R</div><p class="text-xs font-bold text-white">Rohan & Tara <span class="text-gray-600 font-normal">· Salsa</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-green-500 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Kathak is a spiritual experience. My instructor's patience is truly extraordinary."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#22c55e,#00f2ff)">M</div><p class="text-xs font-bold text-white">Meera Joshi <span class="text-gray-600 font-normal">· Kathak</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-yellow-400 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Ballet gave me discipline I carry everywhere. Scouted after just 8 months."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">D</div><p class="text-xs font-bold text-white">Divya Sharma <span class="text-gray-600 font-normal">· Ballet</span></p></div>
+                </div>
+                <!-- Duplicate for seamless loop -->
+                <div class="glass p-6 rounded-2xl border-l-4 border-pink-500 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Elite Dance completely transformed me. The Bharatanatyam training is unmatched in the city."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ff007f,#a855f7)">P</div><p class="text-xs font-bold text-white">Priya Nair <span class="text-gray-600 font-normal">· Bharatanatyam</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-cyan-400 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"The Hip Hop classes are FIRE. I placed top 3 in my very first battle."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#00f2ff,#3b82f6)">A</div><p class="text-xs font-bold text-white">Arjun Mehta <span class="text-gray-600 font-normal">· Hip Hop</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-purple-500 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Contemporary became my therapy. I've never felt stronger or more expressive."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#a855f7,#f97316)">S</div><p class="text-xs font-bold text-white">Sneha Kulkarni <span class="text-gray-600 font-normal">· Contemporary</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-orange-500 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★☆</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Salsa nights at Elite are legendary. Now we compete at the state level."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ef4444,#eab308)">R</div><p class="text-xs font-bold text-white">Rohan & Tara <span class="text-gray-600 font-normal">· Salsa</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-green-500 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Kathak is a spiritual experience. My instructor's patience is truly extraordinary."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#22c55e,#00f2ff)">M</div><p class="text-xs font-bold text-white">Meera Joshi <span class="text-gray-600 font-normal">· Kathak</span></p></div>
+                </div>
+                <div class="glass p-6 rounded-2xl border-l-4 border-yellow-400 space-y-3" style="width:320px;flex-shrink:0;">
+                    <div class="text-yellow-400 text-xs">★★★★★</div>
+                    <p class="text-gray-300 text-xs leading-relaxed italic">"Ballet gave me discipline I carry everywhere. Scouted after just 8 months."</p>
+                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">D</div><p class="text-xs font-bold text-white">Divya Sharma <span class="text-gray-600 font-normal">· Ballet</span></p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="mt-16 glass rounded-3xl p-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div><h4 class="text-3xl font-black text-cyan-400">5,000+</h4><p class="text-[10px] uppercase text-gray-500 mt-1 tracking-widest">Students Trained</p></div>
+            <div><h4 class="text-3xl font-black text-pink-500">4.9★</h4><p class="text-[10px] uppercase text-gray-500 mt-1 tracking-widest">Average Rating</p></div>
+            <div><h4 class="text-3xl font-black text-purple-400">98%</h4><p class="text-[10px] uppercase text-gray-500 mt-1 tracking-widest">Would Recommend</p></div>
+            <div><h4 class="text-3xl font-black text-orange-400">340+</h4><p class="text-[10px] uppercase text-gray-500 mt-1 tracking-widest">Reviews Written</p></div>
+        </div>
+
+    </div>
+</section>
+<!-- TESTIMONIALS SECTION END -->
+
+<section id="contact" class="py-20 px-6">
+
+    <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12">
+        <div>
+            <h3 class="text-4xl font-black mb-6 uppercase italic text-cyan-400">Elite Advantage</h3>
+            <p class="text-gray-400 mb-8">Our studios are equipped with professional shock-absorbent flooring, surround sound acoustics, and personalized feedback systems.</p>
+            <div class="space-y-6">
+                <div class="flex items-center gap-4"><span class="text-3xl">📍</span><div><h5 class="font-bold">Main Studio</h5><p class="text-gray-500 text-sm">Bhanugudi junction,Kakinada</p></div></div>
+                <div class="flex items-center gap-4"><span class="text-3xl">✉️</span><div><h5 class="font-bold">Email Us</h5><p class="text-gray-500 text-sm">admissions@elitedance.com</p></div></div>
+                <div class="flex items-center gap-4"><span class="text-3xl">📞</span><div><h5 class="font-bold">Call Support</h5><p class="text-gray-500 text-sm">+91 90000 12345</p></div></div>
+            </div>
+        </div>
+        <form id="mentorForm" class="glass p-8 rounded-3xl space-y-4 border-t-4 border-pink-500">
+    <h4 class="text-xl font-bold mb-4">Request a Trial Class</h4>
+    <input type="text" id="mentor-name" placeholder="Your Name" required class="p-4 rounded-xl outline-none">
+    <input type="email" id="mentor-email" placeholder="Email Address" required class="p-4 rounded-xl outline-none">
+    <textarea id="mentor-message" placeholder="Tell us about your dance goals..." rows="4" class="p-4 rounded-xl outline-none"></textarea>
+    <button type="button" onclick="submitMentorRequest()" class="btn-neon w-full py-4 rounded-xl font-bold uppercase tracking-widest">Connect with a Mentor</button>
+    <p id="mentor-status" class="text-center text-sm font-bold mt-2"></p>
+</form>
+    </div>
+</section>
+
+<div id="detail-modal" class="fixed inset-0 z-[101] hidden flex items-center justify-center p-4 modal-bg">    
+    <!-- Full background image -->
+    <div id="detail-modal-bg" class="absolute inset-0 z-0" style="background-size:cover;background-position:center;will-change:transform;contain:strict;transform:translateZ(0);">
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.55);"></div>
+</div>
+
+    <!-- Description card floating on top -->
+    <div class="relative z-10 bg-black/20 backdrop-blur-sm w-full max-w-2xl p-8 md:p-10 rounded-[2rem] border border-white/10 shadow-2xl animate__animated animate__fadeInUp">
+        
+        <button onclick="closeDetails()" class="absolute top-6 right-6 text-gray-400 hover:text-white transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+
+        <div class="flex flex-col space-y-6">
+            <div class="flex items-center gap-5 border-b border-white/10 pb-6">
+                <div id="detail-icon" class="text-5xl bg-white/10 p-4 rounded-2xl"></div>
+                <div>
+                    <h2 id="detail-title" class="text-2xl md:text-3xl font-black text-cyan-400 uppercase tracking-tight leading-none"></h2>
+                    <p id="detail-fee" class="text-pink-500 font-bold text-lg mt-1"></p>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-[10px] uppercase tracking-[0.2em] text-pink-500 mb-2 font-black">Description</h4>
+                <p id="detail-description" class="text-white leading-relaxed text-sm md:text-base font-medium"></p>
+            </div>
+
+            <div>
+                <h4 class="text-[10px] uppercase tracking-[0.2em] text-cyan-400 mb-3 font-black">Mastery Path</h4>
+                <ul id="detail-mastery" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs md:text-sm text-gray-200"></ul>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="switchToEnroll()" class="btn-neon w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-lg">Enroll in this Class</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="enroll-modal" class="fixed inset-0 z-[102] bg-black/95 hidden flex items-center justify-center p-4">
+    <div class="glass w-full max-w-md p-8 rounded-[2rem] relative">
+        <button onclick="closeEnroll()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition">✕</button>
+        <h2 class="text-2xl font-black mb-2 text-cyan-400 uppercase italic">Registration</h2>
+        <div class="flex items-center gap-3 mb-6 glass p-3 rounded-xl">
+            <img id="enroll-avatar" src="" class="w-9 h-9 rounded-full border-2 border-cyan-400 object-cover">
+            <div>
+                <p id="enroll-user-name" class="text-xs font-bold text-cyan-400"></p>
+                <p id="enroll-user-email" class="text-[10px] text-gray-500"></p>
+            </div>
+            <span class="ml-auto text-green-400 text-[10px] font-bold">✔ Signed In</span>
+        </div>
+        <form id="enrollmentForm" class="space-y-4">
+            <input type="text" id="name" placeholder="Full Name" required class="p-4 rounded-xl outline-none">
+            <input type="email" id="email" placeholder="Email Address" required class="p-4 rounded-xl outline-none">
+            <input type="tel" id="phone" placeholder="Phone Number" required class="p-4 rounded-xl outline-none">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="number" id="age" placeholder="Age" class="p-4 rounded-xl outline-none">
+                <select id="experience_level" class="p-4 rounded-xl outline-none">
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+            </div>
+            <select id="dance_style" class="p-4 rounded-xl outline-none"></select>
+            <button type="submit" class="btn-neon w-full py-4 rounded-xl font-bold uppercase">Confirm Spot</button>
+        </form>
+        <p id="status-msg" class="mt-4 text-center text-sm font-bold"></p>
+    </div>
+</div>
+
+<script>
+// ─── SUPABASE INIT ────────────────────────────────────────────
+const SUPABASE_URL     = "https://gxdijcyjambxhigzxfgf.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4ZGlqY3lqYW1ieGhpZ3p4ZmdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyODYyMjMsImV4cCI6MjA4Nzg2MjIyM30.S5Rq_I0ujdUKrrSoaWedt7NtTLp6mQ2N4efoxwaU3uI";
+
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+        persistSession: true,     // Keep session alive on page refresh
+        detectSessionInUrl: true  // Auto-exchange OAuth code in URL → session
+    }
+});
+
+// ─── SESSION (single source of truth) ────────────────────────
+let currentSession = null;
+
+// Restore session on page load (covers both refresh & OAuth redirect)
+supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    currentSession = session;
+    updateAuthUI(session);
+    if (session) prefillForm(session.user);
+});
+
+// Listen to all future auth events
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN') {
+        currentSession = session;
+        updateAuthUI(session);
+        prefillForm(session.user);
+        // Auto-open enroll if user came through the auth gate
+        if (sessionStorage.getItem('pendingEnroll')) {
+            sessionStorage.removeItem('pendingEnroll');
+            document.getElementById('auth-gate').classList.add('hidden');
+            setTimeout(showEnroll, 400);
+        }
+    }
+    if (event === 'SIGNED_OUT') {
+        // ✅ FIX: Only reset here — no duplicate call from signOut()
+        currentSession = null;
+        updateAuthUI(null);
+        document.getElementById('name').value  = '';
+        document.getElementById('email').value = '';
+    }
+});
+
+// ─── AUTH UI ──────────────────────────────────────────────────
+function updateAuthUI(session) {
+    const loginWrap   = document.getElementById('login-btn-wrap');
+    const userDisplay = document.getElementById('user-display');
+
+    if (session && session.user) {
+        const meta        = session.user.user_metadata || {};
+        const displayName = meta.full_name || meta.name || session.user.email;
+        const avatarUrl   = meta.avatar_url ||
+            'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName) + '&background=ff007f&color=fff';
+
+        loginWrap.classList.add('hidden');
+        userDisplay.classList.remove('hidden');
+        document.getElementById('user-name').textContent            = displayName;
+        document.getElementById('user-avatar').src                  = avatarUrl;
+        document.getElementById('enroll-avatar').src                = avatarUrl;
+        document.getElementById('enroll-user-name').textContent     = displayName;
+        document.getElementById('enroll-user-email').textContent    = session.user.email;
+    } else {
+        loginWrap.classList.remove('hidden');
+        userDisplay.classList.add('hidden');
+    }
+}
+
+function prefillForm(user) {
+    const meta = user.user_metadata || {};
+    document.getElementById('name').value  = meta.full_name || meta.name || '';
+    document.getElementById('email').value = user.email || '';
+}
+
+// ─── GOOGLE SIGN IN / OUT ─────────────────────────────────────
+// Using onclick on HTML elements (not addEventListener) for reliability after logout
+
+async function signInWithGoogle() {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/' }
+    });
+    if (error) alert('Sign-in error: ' + error.message);
+}
+
+function signInFromGate() {
+    sessionStorage.setItem('pendingEnroll', '1');
+    signInWithGoogle();
+}
+
+async function signOut() {
+    // ✅ FIX: Do NOT call updateAuthUI here.
+    // onAuthStateChange(SIGNED_OUT) is the single handler — prevents race condition.
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) console.error('Sign-out error:', error.message);
+}
+async function submitMentorRequest() {
+    const name    = document.getElementById('mentor-name').value.trim();
+    const email   = document.getElementById('mentor-email').value.trim();
+    const message = document.getElementById('mentor-message').value.trim();
+    const status  = document.getElementById('mentor-status');
+
+    if (!name || !email) {
+        status.style.color = 'red';
+        status.innerText = 'Please fill in your name and email.';
+        return;
+    }
+
+    status.style.color = '#aaa';
+    status.innerText = 'Sending...';
+
+    try {
+        const res = await fetch('/mentor-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, message })
+        });
+        const result = await res.json();
+        if (res.ok) {
+            status.style.color = '#00f2ff';
+            status.innerText = result.message;
+            document.getElementById('mentorForm').reset();
+        } else {
+            status.style.color = 'red';
+            status.innerText = result.error || 'Something went wrong.';
+        }
+    } catch (err) {
+        status.style.color = 'red';
+        status.innerText = 'Server error. Try again.';
+    }
+}
+
+// ─── DANCE DATA ───────────────────────────────────────────────
+const danceData = {
+
+Bharatanatyam: {
+icon:'🕉️',
+accent:'accent-bharatanatyam',
+fee:'₹2,500/mo',
+bg:'/static/bharatanatyam.jpeg',
+desc:'A major form of Indian classical dance that originated in Tamil Nadu. It is known for its fixed upper torso, bent legs, and flexed knees combined with spectacular footwork.',
+mastery:[
+'Hand Gestures (Mudras)',
+'Facial Expressions (Abhinaya)',
+'Rhythmic Patterns (Tala)',
+'Traditional Arangetram Prep'
+]
+},
+
+'Hip Hop': {
+icon:'👟',
+accent:'accent-hiphop',
+fee:'₹3,000/mo',
+bg:'/static/hiphop.jpeg',
+desc:'Vibrant street dance styles primarily performed to hip-hop music. Covers foundation of urban movement and personal freestyle expression.',
+mastery:[
+'Popping & Locking',
+'Breaking Foundations',
+'Choreography Memory',
+'Freestyle Battle Tactics'
+]
+},
+
+Kathak: {
+icon:'🌪️',
+accent:'accent-kathak',
+fee:'₹2,800/mo',
+bg:'/static/kathak.jpeg',
+desc:'Hailing from Northern India, Kathak emphasizes rhythmic foot movements adorned with small bells (Ghungroo), harmonized to music.',
+mastery:[
+'Complex Footwork (Tatkar)',
+'Rapid Spins (Chakkars)',
+'Storytelling Narratives',
+'Mathematical Rhythm'
+]
+},
+
+Salsa: {
+icon:'💃',
+accent:'accent-salsa',
+fee:'₹3,500/mo',
+bg:'/static/salsa.png',
+desc:'A popular form of social dance from the Caribbean. High energy, spicy, and focused on the connection between partners.',
+mastery:[
+'Lead & Follow Dynamics',
+'Latin Body Roll',
+'Cross Body Lead',
+'Spin Technique'
+]
+},
+
+Contemporary: {
+icon:'🎭',
+accent:'accent-contemporary',
+fee:'₹3,200/mo',
+bg:'/static/contemporary.png',
+desc:'An expressive style combining modern, jazz, lyrical, and classical ballet elements.',
+mastery:[
+'Floor Work',
+'Weight Release',
+'Emotional Expression',
+'Cunningham & Graham Techniques'
+]
+},
+
+Ballet: {
+icon:'🩰',
+accent:'accent-ballet',
+fee:'₹4,000/mo',
+bg:'/static/ballet.png',
+desc:'The foundation of all dance styles. Develops poise, discipline, and physical strength through highly formalized steps.',
+mastery:[
+'Barre Technique',
+'Plié & Tendu Alignment',
+'Center Adagio',
+'Pointe Work Foundations'
+]
+},
+
+Western: {
+icon:'🎷',
+accent:'accent-western',
+fee:'₹3,000/mo',
+bg:'/static/western.jpeg',
+desc:'Sharp, energetic, and theatrical. Built on Western pop and Broadway tradition with dynamic stage presence.',
+mastery:[
+'Sharp Isolations',
+'Leaps & Kicks',
+'Pirouettes',
+'Performance Charisma'
+]
+},
+
+Kuchipudi: {
+icon:'✨',
+accent:'accent-kuchipudi',
+fee:'₹2,500/mo',
+bg:'/static/kuchipudi.png',
+desc:'One of the eight major Indian classical dances — a dance-drama rooted in the ancient Natya Shastra.',
+mastery:[
+'Tarangam (Dancing on plate)',
+'Dramatic Speech',
+'Symmetry & Grace',
+'Classical Literature'
+]
+},
+
+Freestyle: {
+icon:'🌀',
+accent:'accent-freestyle',
+fee:'₹2,800/mo',
+bg:'/static/freestyle.jpeg',
+desc:'Unrestricted, expressive movement drawn from multiple dance styles. Build your own unique performance identity.',
+mastery:[
+'Improvisation',
+'Style Fusion',
+'Stage Confidence',
+'Personal Choreography'
+]
+}
+
+};
+
+
+const grid        = document.getElementById('dance-grid');
+const styleSelect = document.getElementById('dance_style');
+
+Object.keys(danceData).forEach(style => {
+    const d = danceData[style];
+    const bgStyle = d.bg ? `background-image: url('${d.bg}'); background-size: cover; background-position: center;` : '';
+grid.innerHTML += `
+  <div class="dance-card ${d.accent} p-8 rounded-3xl" onclick="showDetails('${style}')">
+    <div class="text-4xl mb-4">${d.icon}</div>
+    <h4 class="text-2xl font-bold mb-1 italic">${style}</h4>
+    <p class="text-gray-500 text-xs">Explore Syllabus & Fees</p>
+  </div>`;
+    styleSelect.innerHTML += `<option value="${style}">${style}</option>`;
+});
+
+// ─── MODALS ───────────────────────────────────────────────────
+function showDetails(style) {
+    const d = danceData[style];
+    document.getElementById('detail-title').innerText       = style;
+    document.getElementById('detail-icon').innerText        = d.icon;
+    document.getElementById('detail-fee').innerText         = 'Tuition: ' + d.fee;
+    document.getElementById('detail-description').innerText = d.desc;
+    document.getElementById('detail-mastery').innerHTML     = d.mastery.map(i => `<li>✅ ${i}</li>`).join('');
+    document.getElementById('dance_style').value            = style;
+    document.getElementById('detail-modal-bg').style.backgroundImage = `url('${d.bg}')`;
+    document.getElementById('detail-modal').classList.remove('hidden');
+}
+function closeDetails() { document.getElementById('detail-modal').classList.add('hidden'); }
+
+function showEnroll() {
+    if (!currentSession) {
+        document.getElementById('auth-gate').classList.remove('hidden');
+        return;
+    }
+    updateAuthUI(currentSession);
+    document.getElementById('enroll-modal').classList.remove('hidden');
+}
+function closeEnroll() { document.getElementById('enroll-modal').classList.add('hidden'); }
+function switchToEnroll() { closeDetails(); showEnroll(); }
+
+// ─── ENROLL FORM SUBMIT ───────────────────────────────────────
+document.getElementById('enrollmentForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('status-msg');
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+        msg.style.color = 'red';
+        msg.innerText   = 'Session expired. Please sign in again.';
+        setTimeout(() => { closeEnroll(); document.getElementById('auth-gate').classList.remove('hidden'); }, 1500);
+        return;
+    }
+
+    msg.style.color = '#aaa';
+    msg.innerText   = 'Processing...';
+
+    const payload = {
+        name:             document.getElementById('name').value,
+        email:            document.getElementById('email').value,
+        phone:            document.getElementById('phone').value,
+        age:              document.getElementById('age').value ? parseInt(document.getElementById('age').value) : null,
+        dance_style:      document.getElementById('dance_style').value,
+        experience_level: document.getElementById('experience_level').value
+    };
+
+    try {
+        const res    = await fetch('/enroll', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body:    JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (res.ok) {
+            msg.style.color = '#00f2ff';
+            msg.innerText   = 'Welcome to the Academy! 🎉';
+            setTimeout(() => { document.getElementById('enrollmentForm').reset(); msg.innerText = ''; closeEnroll(); }, 3000);
+        } else {
+            msg.style.color = 'red';
+            msg.innerText   = result.error || 'Submission failed. Please try again.';
+        }
+    } catch (err) {
+        console.error(err);
+        msg.style.color = 'red';
+        msg.innerText   = 'Server error. Try again.';
+    }
+};
+</script>
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+});
+</script>
+</body>
+</html>
