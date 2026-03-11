@@ -6,6 +6,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 import threading
+import resend
+
 
 # -----------------------------
 # SUPABASE CONFIG
@@ -38,23 +40,20 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # EMAIL HELPERS
 # ----------------------------------------------------
 
-def _send_email(to_address, subject, body):
-    msg = MIMEMultipart()
-    msg["From"]    = EMAIL_SENDER
-    msg["To"]      = to_address
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
 
+resend.api_key = "re_bo7FaHuo_5e7YPSnZmd1nmKNjwMAcy4WH"  # ← mee API key ikkada
+
+def _send_email(to_address, subject, body):
     try:
-        # Use SMTP_SSL on port 465 instead of STARTTLS on 587
-        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-        server.login(EMAIL_SENDER, EMAIL_PASSWORD)
-        server.sendmail(EMAIL_SENDER, to_address, msg.as_string())
-        server.quit()
+        resend.Emails.send({
+            "from": "Elite Dance <onboarding@resend.dev>",
+            "to": to_address,
+            "subject": subject,
+            "text": body
+        })
         print(f"✅ Email sent to {to_address}")
     except Exception as e:
-        print(f"❌ Email to {to_address} failed:", e)
-
+        print(f"❌ Email failed: {e}")
 def send_thank_you_email(user_email, user_name, dance_style):
     """Sent to student after enrollment — runs in background thread."""
     subject = "🎉 Welcome to Elite Dance Academy!"
