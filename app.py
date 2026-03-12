@@ -198,7 +198,7 @@ def enroll():
         return jsonify({"error": f"Database error: {str(e)}"}), 500
 
 
-@app.route("/contact", methods=["POST"])
+@app.route("/mentor-request", methods=["POST"])
 def contact():
     data    = request.get_json()
     name    = data.get("name", "").strip()
