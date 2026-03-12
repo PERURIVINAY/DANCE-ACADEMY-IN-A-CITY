@@ -208,7 +208,18 @@ def contact():
     if not name or not email:
         return jsonify({"error": "Name and email are required."}), 400
 
-    # Send to BOTH user and academy
+    # ── Save to Supabase ──
+    try:
+        supabase.table("mentor_requests").insert({
+            "name":    name,
+            "email":   email,
+            "message": message
+        }).execute()
+    except Exception as e:
+        print("[MENTOR DB ERROR]", e)
+        return jsonify({"error": "Could not save request."}), 500
+
+    # ── Send emails ──
     send_mentor_request_emails(name, email, message)
 
     return jsonify({"message": "Request received! We'll contact you within 24 hours. 🎉"}), 200
