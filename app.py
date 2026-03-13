@@ -2,232 +2,249 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from supabase import create_client
 import os
+import traceback
 import requests
-import threading
 
-SUPABASE_URL = "https://gxdijcyjambxhigzxfgf.supabase.co"
-SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4ZGlqY3lqYW1ieGhpZ3p4ZmdmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjI4NjIyMywiZXhwIjoyMDg3ODYyMjIzfQ.jiSGc7GjFPuoku-sw7Zr9fE-WjjbWKSQ6jCkkwQNMoE"
-supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+# -----------------------------
+# SUPABASE CONFIG
+# -----------------------------
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-RESEND_API_KEY = "re_KGGypZv7_9HybgmF8ehBr2Z9R5BhECMLT"
-ACADEMY_EMAIL  = "vinayperuri934@gmail.com"
-EMAIL_FROM     = "Elite Dance Academy <onboarding@resend.dev>"
+# -----------------------------
+# BREVO EMAIL CONFIG
+# -----------------------------
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
+BREVO_SENDER_EMAIL = os.environ.get("BREVO_SENDER_EMAIL")
 
-app = Flask(__name__, template_folder="templates", static_folder="static")
-CORS(app, resources={r"/*": {"origins": "*"}})
+# -----------------------------
+# FLASK APP
+# -----------------------------
+app = Flask(
+    __name__,
+    template_folder="templates",
+    static_folder="static"
+)
+
+CORS(app)
+
+# Safe Supabase init
+try:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    print("Supabase connected")
+except Exception as e:
+    supabase = None
+    print("Supabase init failed:", e)
 
 
-# ----------------------------------------------------
-# EMAIL HELPER
-# ----------------------------------------------------
-
-def _send_email(to, subject, body):
-    """Send one email via Resend API."""
+# -----------------------------
+# EMAIL FUNCTION (Brevo)
+# -----------------------------
+def send_email(to_email, subject, html_body):
     try:
+        if not BREVO_API_KEY:
+            print("BREVO_API_KEY not set")
+            return False
+
         response = requests.post(
-            "https://api.resend.com/emails",
+            "https://api.brevo.com/v3/smtp/email",
+            json={
+                "sender": {
+                    "name": "Elite Dance Academy",
+                    "email": BREVO_SENDER_EMAIL
+                },
+                "to": [{"email": to_email}],
+                "subject": subject,
+                "htmlContent": html_body
+            },
             headers={
-                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "api-key": BREVO_API_KEY,
                 "Content-Type": "application/json"
             },
-            json={
-                "from":    EMAIL_FROM,
-                "to":      [to],
-                "subject": subject,
-                "text":    body
-            }
+            timeout=10
         )
-        print(f"✅ Email → {to} | status: {response.status_code} | {response.text}")
-        return response.status_code == 200
+
+        print("Brevo response:", response.status_code, response.text)
+        return response.status_code == 201
+
     except Exception as e:
-        print(f"❌ Email failed → {to}: {e}")
+        print("Email error:", e)
         return False
 
 
-def send_enrollment_emails(student_email, student_name, dance_style, phone, experience):
-    """Send 2 emails in background threads — one to student, one to academy."""
-
-    # ── Email 1: Welcome email to STUDENT ──
-    student_subject = "🎉 Welcome to Elite Dance Academy!"
-    student_body = f"""Hi {student_name},
-
-Thank you for enrolling in the {dance_style} class at Elite Dance Academy!
-
-We're excited to have you join our dance family 💃
-
-Our team will contact you soon with class schedules and next steps.
-
-Keep Dancing!
-Elite Dance Academy
-"""
-    threading.Thread(
-        target=_send_email,
-        args=(student_email, student_subject, student_body),
-        daemon=True
-    ).start()
-
-    # ── Email 2: Notification to ACADEMY OWNER ──
-    academy_subject = f"📋 New Enrollment — {student_name} ({dance_style})"
-    academy_body = f"""New student enrolled!
-
-Name         : {student_name}
-Email        : {student_email}
-Phone        : {phone}
-Dance Style  : {dance_style}
-Experience   : {experience}
-
-Please follow up with the student.
-
-Elite Dance Academy
-"""
-    threading.Thread(
-        target=_send_email,
-        args=(ACADEMY_EMAIL, academy_subject, academy_body),
-        daemon=True
-    ).start()
-
-
-def send_mentor_request_emails(user_name, user_email, message):
-    """Send 2 emails — confirmation to user, alert to academy."""
-
-    # ── Email 1: Confirmation to USER ──
-    user_subject = "✅ We received your request — Elite Dance Academy"
-    user_body = f"""Hi {user_name},
-
-Thank you for reaching out to Elite Dance Academy!
-
-We've received your message and one of our mentors will get back to you within 24 hours.
-
-Your message:
-"{message}"
-
-See you on the dance floor! 🕺
-Elite Dance Academy
-"""
-    threading.Thread(
-        target=_send_email,
-        args=(user_email, user_subject, user_body),
-        daemon=True
-    ).start()
-
-    # ── Email 2: Alert to ACADEMY OWNER ──
-    academy_subject = f"📩 New Mentor Request from {user_name}"
-    academy_body = f"""New mentor request received via the website.
-
-Name    : {user_name}
-Email   : {user_email}
-Message : {message}
-
-Please contact this person soon.
-Elite Dance Academy
-"""
-    threading.Thread(
-        target=_send_email,
-        args=(ACADEMY_EMAIL, academy_subject, academy_body),
-        daemon=True
-    ).start()
-
-
-# ----------------------------------------------------
-# ROUTES
-# ----------------------------------------------------
-
+# -----------------------------
+# HOME ROUTE
+# -----------------------------
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
+# -----------------------------
+# SUPABASE TEST ROUTE
+# -----------------------------
 @app.route("/test-supabase")
 def test_supabase():
     try:
+        if not supabase:
+            return jsonify({"connected": False, "error": "Supabase not initialized"}), 500
         data = supabase.table("enrollments").select("*").limit(1).execute()
         return jsonify({"connected": True, "data": data.data})
     except Exception as e:
-        return jsonify({"connected": False, "error": str(e)})
+        return jsonify({"connected": False, "error": str(e)}), 500
 
 
+# -----------------------------
+# EMAIL TEST ROUTE
+# -----------------------------
+@app.route("/test-email")
+def test_email():
+    success = send_email(
+        BREVO_SENDER_EMAIL,
+        "Test Email from Elite Dance Academy",
+        "<h2>Email works!</h2><p>Brevo is configured correctly.</p>"
+    )
+    if success:
+        return jsonify({"message": "Test email sent successfully"})
+    return jsonify({"error": "Failed. Check BREVO_API_KEY and BREVO_SENDER_EMAIL in Railway."}), 500
+
+
+# -----------------------------
+# ENROLL ROUTE
+# -----------------------------
 @app.route("/enroll", methods=["POST"])
 def enroll():
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        return jsonify({"error": "Authentication required."}), 401
-
-    token = auth_header.split(" ")[1]
     try:
-        auth_response = supabase.auth.get_user(token)
-        user = auth_response.user
-        if user is None:
-            return jsonify({"error": "Invalid session."}), 403
-    except Exception as e:
-        print("[AUTH ERROR]", e)
-        return jsonify({"error": "Invalid or expired token"}), 403
+        if not supabase:
+            return jsonify({"error": "Database not connected."}), 500
 
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "No data provided."}), 400
+        # Verify Bearer token
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Unauthorized. Please sign in."}), 401
 
-    required_fields = ["name", "email", "phone", "dance_style", "experience_level"]
-    missing = [f for f in required_fields if not data.get(f)]
-    if missing:
-        return jsonify({"error": f"Missing: {', '.join(missing)}"}), 400
+        token = auth_header.split(" ")[1]
 
-    try:
+        try:
+            user_response = supabase.auth.get_user(token)
+            if not user_response or not user_response.user:
+                return jsonify({"error": "Invalid or expired session. Please sign in again."}), 401
+        except Exception as auth_err:
+            print("Auth error:", auth_err)
+            return jsonify({"error": "Session verification failed. Please sign in again."}), 401
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        name        = (data.get("name") or "").strip()
+        email       = (data.get("email") or "").strip()
+        phone       = (data.get("phone") or "").strip()
+        age         = data.get("age")
+        dance_style = (data.get("dance_style") or "").strip()
+        experience  = (data.get("experience_level") or "").strip()
+
+        if not name or not email or not phone:
+            return jsonify({"error": "Name, email, and phone are required."}), 400
+
+        # Save to Supabase
         response = supabase.table("enrollments").insert({
-            "name":             data.get("name"),
-            "email":            data.get("email"),
-            "phone":            data.get("phone"),
-            "age":              data.get("age"),
-            "dance_style":      data.get("dance_style"),
-            "experience_level": data.get("experience_level"),
-            "user_id":          user.id
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "age": age,
+            "dance_style": dance_style,
+            "experience_level": experience
         }).execute()
 
-        # Send to BOTH student and academy
-        send_enrollment_emails(
-            student_email = data.get("email"),
-            student_name  = data.get("name"),
-            dance_style   = data.get("dance_style"),
-            phone         = data.get("phone"),
-            experience    = data.get("experience_level")
-        )
+        # Send confirmation email to student
+        try:
+            send_email(
+                email,
+                "Welcome to Elite Dance Academy 💃",
+                f"""
+                <div style="font-family:Arial;padding:30px;background:#f4f6f8">
+                <div style="max-width:600px;margin:auto;background:white;padding:30px;border-radius:10px">
+                <h2 style="color:#e63946;text-align:center">💃 Welcome to Elite Dance Academy</h2>
+                <p>Hello <b>{name}</b>,</p>
+                <p>Thank you for enrolling in <b>{dance_style}</b>.</p>
+                <p>We are excited to welcome you to our dance family!</p>
+                <div style="background:#f1faee;padding:15px;border-radius:8px;margin:20px 0">
+                <b>Enrollment Details</b><br>
+                Name: {name}<br>
+                Dance Style: {dance_style}
+                </div>
+                <p>Our team will contact you soon with class schedule details.</p>
+                <p>Keep dancing, keep shining! ✨</p>
+                <hr>
+                <p style="text-align:center;color:#777">Elite Dance Academy<br>Inspiring Passion Through Dance</p>
+                </div>
+                </div>
+                """
+            )
+        except Exception as mail_err:
+            print("Email failed (non-fatal):", mail_err)
 
-        return jsonify({"message": "Enrollment successful!", "data": response.data}), 201
+        return jsonify({"message": "Enrollment successful", "data": response.data}), 200
 
     except Exception as e:
-        print("[DB ERROR]", e)
-        return jsonify({"error": f"Database error: {str(e)}"}), 500
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
 
 
+# -----------------------------
+# CONTACT ROUTE
+# -----------------------------
 @app.route("/mentor-request", methods=["POST"])
 def contact():
-    data    = request.get_json()
-    name    = data.get("name", "").strip()
-    email   = data.get("email", "").strip()
-    message = data.get("message", "").strip()
-
-    if not name or not email:
-        return jsonify({"error": "Name and email are required."}), 400
-
-    # ── Save to Supabase ──
     try:
-        supabase.table("mentor_requests").insert({
-            "name":    name,
-            "email":   email,
-            "message": message
-        }).execute()
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        name    = (data.get("name") or "").strip()
+        email   = (data.get("email") or "").strip()
+        message = (data.get("message") or "").strip()
+
+        if not name or not email or not message:
+            return jsonify({"error": "All fields are required."}), 400
+
+        # Save to Supabase
+        if supabase:
+            supabase.table("mentor_requests").insert({
+                "name":    name,
+                "email":   email,
+                "message": message
+            }).execute()
+
+        # Send confirmation to student
+        try:
+            send_email(
+                email,
+                "We received your message | Elite Dance Academy",
+                f"""
+                <h2>Thank You for Contacting Elite Dance Academy</h2>
+                <p>Hello <b>{name}</b>,</p>
+                <p>Thank you for reaching out to us.</p>
+                <p>Our mentor will review your request and contact you shortly.</p>
+                <p>We are excited to help you start your dance journey! 💃</p>
+                <br>
+                <p>Best Regards,<br>Elite Dance Academy Team</p>
+                """
+            )
+        except Exception as mail_err:
+            print("Email failed (non-fatal):", mail_err)
+
+        return jsonify({"message": "Request received! We'll contact you within 24 hours. 🎉"}), 200
+
     except Exception as e:
-        print("[MENTOR DB ERROR]", e)
-        return jsonify({"error": "Could not save request."}), 500
-
-    # ── Send emails ──
-    send_mentor_request_emails(name, email, message)
-
-    return jsonify({"message": "Request received! We'll contact you within 24 hours. 🎉"}), 200
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
 
 
-# ----------------------------------------------------
+# -----------------------------
 # RUN SERVER
-# ----------------------------------------------------
+# -----------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port
