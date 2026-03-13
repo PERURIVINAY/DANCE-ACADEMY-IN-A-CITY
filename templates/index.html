@@ -58,7 +58,6 @@
         }
         .dance-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px -10px var(--accent); }
         .dance-card:hover::before { opacity: 0.28; }
-        /* Active state for touch */
         .dance-card:active { transform: scale(0.97); }
 
         .marquee-track { display: flex; gap: 24px; animation: marquee 30s linear infinite; width: max-content; }
@@ -72,7 +71,6 @@
             border: 1px solid rgba(255,255,255,0.1) !important;
             color: white !important;
             width: 100%;
-            /* Prevent iOS zoom on focus */
             font-size: 16px !important;
         }
         select option { background: #121217; color: white; }
@@ -115,15 +113,12 @@
         }
 
         #testimonials {
-            background-image: url('/static/community-bg.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background: linear-gradient(135deg, #1a0005 0%, #2d0008 40%, #1a0005 100%);
             position: relative;
         }
         #testimonials::before {
             content:""; position:absolute; inset:0;
-            background:rgba(0,0,0,0.75); z-index:0;
+            background: rgba(0,0,0,0.3); z-index:0;
         }
 
         /* Accent colors */
@@ -171,9 +166,7 @@
         .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
         .hamburger.open span:nth-child(2) { opacity: 0; }
         .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-        @media (max-width: 768px) {
-            .hamburger { display: flex; }
-        }
+        @media (max-width: 768px) { .hamburger { display: flex; } }
 
         /* ── MOBILE MODAL ── */
         @media (max-width: 640px) {
@@ -209,10 +202,7 @@
             }
         }
 
-        /* Smooth scroll for mobile */
-        @media (max-width: 768px) {
-            body { background-attachment: scroll; }
-        }
+        @media (max-width: 768px) { body { background-attachment: scroll; } }
     </style>
 </head>
 <body>
@@ -234,16 +224,12 @@
 <!-- NAVBAR -->
 <nav class="fixed w-full z-50 glass px-4 md:px-6 py-4 flex justify-between items-center">
     <h1 class="text-xl md:text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-cyan-400">ELITE DANCE</h1>
-
-    <!-- Desktop Nav Links -->
     <div class="hidden md:flex space-x-8 font-bold text-xs uppercase tracking-widest">
         <a href="#about" class="hover:text-cyan-400 transition">About</a>
         <a href="#courses" class="hover:text-cyan-400 transition">Classes</a>
         <a href="#testimonials" class="hover:text-cyan-400 transition">Reviews</a>
         <a href="#contact" class="hover:text-cyan-400 transition">Contact</a>
     </div>
-
-    <!-- Right side: auth + hamburger -->
     <div class="flex items-center gap-3">
         <div id="auth-area">
             <div id="login-btn-wrap">
@@ -258,8 +244,6 @@
                 <button onclick="signOut()" class="text-[10px] text-gray-500 hover:text-red-400 transition font-bold uppercase ml-1">Logout</button>
             </div>
         </div>
-
-        <!-- Hamburger (mobile only) -->
         <div class="hamburger md:hidden" id="hamburger" onclick="toggleMenu()">
             <span></span><span></span><span></span>
         </div>
@@ -320,73 +304,23 @@
     <div class="max-w-7xl mx-auto relative z-10">
         <h2 class="text-center text-3xl md:text-4xl font-black mb-2 italic uppercase">What Our <span class="text-pink-500">Dancers</span> Say</h2>
         <p class="text-center text-gray-500 text-sm mb-10 md:mb-14 uppercase tracking-widest">Real students. Real journeys.</p>
-
         <div class="overflow-hidden mb-6">
             <div class="marquee-track">
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-pink-500 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Elite Dance completely transformed me. The Bharatanatyam training is unmatched in the city."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ff007f,#a855f7)">P</div><p class="text-xs font-bold text-white">Priya Nair <span class="text-gray-600 font-normal">· Bharatanatyam</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-cyan-400 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"The Hip Hop classes are FIRE. I placed top 3 in my very first battle."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#00f2ff,#3b82f6)">A</div><p class="text-xs font-bold text-white">Arjun Mehta <span class="text-gray-600 font-normal">· Hip Hop</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-purple-500 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Contemporary became my therapy. I've never felt stronger or more expressive."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#a855f7,#f97316)">S</div><p class="text-xs font-bold text-white">Sneha Kulkarni <span class="text-gray-600 font-normal">· Contemporary</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-orange-500 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★☆</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Salsa nights at Elite are legendary. Now we compete at the state level."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ef4444,#eab308)">R</div><p class="text-xs font-bold text-white">Rohan & Tara <span class="text-gray-600 font-normal">· Salsa</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-green-500 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Kathak is a spiritual experience. My instructor's patience is truly extraordinary."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#22c55e,#00f2ff)">M</div><p class="text-xs font-bold text-white">Meera Joshi <span class="text-gray-600 font-normal">· Kathak</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-yellow-400 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Ballet gave me discipline I carry everywhere. Scouted after just 8 months."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">D</div><p class="text-xs font-bold text-white">Divya Sharma <span class="text-gray-600 font-normal">· Ballet</span></p></div>
-                </div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-pink-500 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"Elite Dance completely transformed me. The Bharatanatyam training is unmatched in the city."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ff007f,#a855f7)">P</div><p class="text-xs font-bold text-white">Priya Nair <span class="text-gray-600 font-normal">· Bharatanatyam</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-cyan-400 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"The Hip Hop classes are FIRE. I placed top 3 in my very first battle."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#00f2ff,#3b82f6)">A</div><p class="text-xs font-bold text-white">Arjun Mehta <span class="text-gray-600 font-normal">· Hip Hop</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-purple-500 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"Contemporary became my therapy. I've never felt stronger or more expressive."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#a855f7,#f97316)">S</div><p class="text-xs font-bold text-white">Sneha Kulkarni <span class="text-gray-600 font-normal">· Contemporary</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-orange-500 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★☆</div><p class="text-gray-300 text-xs leading-relaxed italic">"Salsa nights at Elite are legendary. Now we compete at the state level."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ef4444,#eab308)">R</div><p class="text-xs font-bold text-white">Rohan & Tara <span class="text-gray-600 font-normal">· Salsa</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-green-500 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"Kathak is a spiritual experience. My instructor's patience is truly extraordinary."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#22c55e,#00f2ff)">M</div><p class="text-xs font-bold text-white">Meera Joshi <span class="text-gray-600 font-normal">· Kathak</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-yellow-400 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"Ballet gave me discipline I carry everywhere. Scouted after just 8 months."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">D</div><p class="text-xs font-bold text-white">Divya Sharma <span class="text-gray-600 font-normal">· Ballet</span></p></div></div>
                 <!-- Duplicates for seamless loop -->
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-pink-500 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Elite Dance completely transformed me. The Bharatanatyam training is unmatched in the city."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ff007f,#a855f7)">P</div><p class="text-xs font-bold text-white">Priya Nair <span class="text-gray-600 font-normal">· Bharatanatyam</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-cyan-400 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"The Hip Hop classes are FIRE. I placed top 3 in my very first battle."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#00f2ff,#3b82f6)">A</div><p class="text-xs font-bold text-white">Arjun Mehta <span class="text-gray-600 font-normal">· Hip Hop</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-purple-500 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Contemporary became my therapy. I've never felt stronger or more expressive."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#a855f7,#f97316)">S</div><p class="text-xs font-bold text-white">Sneha Kulkarni <span class="text-gray-600 font-normal">· Contemporary</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-orange-500 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★☆</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Salsa nights at Elite are legendary. Now we compete at the state level."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ef4444,#eab308)">R</div><p class="text-xs font-bold text-white">Rohan & Tara <span class="text-gray-600 font-normal">· Salsa</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-green-500 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Kathak is a spiritual experience. My instructor's patience is truly extraordinary."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#22c55e,#00f2ff)">M</div><p class="text-xs font-bold text-white">Meera Joshi <span class="text-gray-600 font-normal">· Kathak</span></p></div>
-                </div>
-                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-yellow-400 space-y-3" style="width:280px;flex-shrink:0;">
-                    <div class="text-yellow-400 text-xs">★★★★★</div>
-                    <p class="text-gray-300 text-xs leading-relaxed italic">"Ballet gave me discipline I carry everywhere. Scouted after just 8 months."</p>
-                    <div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">D</div><p class="text-xs font-bold text-white">Divya Sharma <span class="text-gray-600 font-normal">· Ballet</span></p></div>
-                </div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-pink-500 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"Elite Dance completely transformed me. The Bharatanatyam training is unmatched in the city."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ff007f,#a855f7)">P</div><p class="text-xs font-bold text-white">Priya Nair <span class="text-gray-600 font-normal">· Bharatanatyam</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-cyan-400 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"The Hip Hop classes are FIRE. I placed top 3 in my very first battle."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#00f2ff,#3b82f6)">A</div><p class="text-xs font-bold text-white">Arjun Mehta <span class="text-gray-600 font-normal">· Hip Hop</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-purple-500 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"Contemporary became my therapy. I've never felt stronger or more expressive."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#a855f7,#f97316)">S</div><p class="text-xs font-bold text-white">Sneha Kulkarni <span class="text-gray-600 font-normal">· Contemporary</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-orange-500 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★☆</div><p class="text-gray-300 text-xs leading-relaxed italic">"Salsa nights at Elite are legendary. Now we compete at the state level."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#ef4444,#eab308)">R</div><p class="text-xs font-bold text-white">Rohan & Tara <span class="text-gray-600 font-normal">· Salsa</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-green-500 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"Kathak is a spiritual experience. My instructor's patience is truly extraordinary."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#22c55e,#00f2ff)">M</div><p class="text-xs font-bold text-white">Meera Joshi <span class="text-gray-600 font-normal">· Kathak</span></p></div></div>
+                <div class="glass p-5 md:p-6 rounded-2xl border-l-4 border-yellow-400 space-y-3" style="width:280px;flex-shrink:0;"><div class="text-yellow-400 text-xs">★★★★★</div><p class="text-gray-300 text-xs leading-relaxed italic">"Ballet gave me discipline I carry everywhere. Scouted after just 8 months."</p><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">D</div><p class="text-xs font-bold text-white">Divya Sharma <span class="text-gray-600 font-normal">· Ballet</span></p></div></div>
             </div>
         </div>
-
         <div class="mt-12 md:mt-16 glass rounded-3xl p-6 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center">
             <div><h4 class="text-2xl md:text-3xl font-black text-cyan-400">5,000+</h4><p class="text-[10px] uppercase text-gray-500 mt-1 tracking-widest">Students Trained</p></div>
             <div><h4 class="text-2xl md:text-3xl font-black text-pink-500">4.9★</h4><p class="text-[10px] uppercase text-gray-500 mt-1 tracking-widest">Average Rating</p></div>
@@ -469,9 +403,13 @@
         <form id="enrollmentForm" class="space-y-3">
             <input type="text" id="name" placeholder="Full Name" required class="p-4 rounded-xl outline-none">
             <input type="email" id="email" placeholder="Email Address" required class="p-4 rounded-xl outline-none">
-            <input type="tel" id="phone" placeholder="Phone Number" required class="p-4 rounded-xl outline-none">
+            <input type="tel" id="phone" placeholder="Phone Number (10 digits)" required maxlength="10"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                class="p-4 rounded-xl outline-none">
             <div class="grid grid-cols-2 gap-3">
-                <input type="number" id="age" placeholder="Age" class="p-4 rounded-xl outline-none">
+                <input type="number" id="age" placeholder="Age" min="1" max="99"
+                    oninput="if(this.value.length>2)this.value=this.value.slice(0,2);if(parseInt(this.value)>99)this.value=99;if(parseInt(this.value)<1&&this.value!='')this.value=1"
+                    class="p-4 rounded-xl outline-none">
                 <select id="experience_level" class="p-4 rounded-xl outline-none">
                     <option value="Beginner">Beginner</option>
                     <option value="Intermediate">Intermediate</option>
@@ -488,7 +426,7 @@
 <script>
 // ─── HAMBURGER MENU ───────────────────────────────────────────
 function toggleMenu() {
-    const menu = document.getElementById('mobile-menu');
+    const menu      = document.getElementById('mobile-menu');
     const hamburger = document.getElementById('hamburger');
     menu.classList.toggle('open');
     hamburger.classList.toggle('open');
@@ -497,9 +435,8 @@ function closeMenu() {
     document.getElementById('mobile-menu').classList.remove('open');
     document.getElementById('hamburger').classList.remove('open');
 }
-// Close menu when clicking outside
 document.addEventListener('click', (e) => {
-    const menu = document.getElementById('mobile-menu');
+    const menu      = document.getElementById('mobile-menu');
     const hamburger = document.getElementById('hamburger');
     if (!hamburger.contains(e.target) && !menu.contains(e.target)) {
         menu.classList.remove('open');
@@ -507,9 +444,10 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// ─── SUPABASE INIT ────────────────────────────────────────────
-const SUPABASE_URL      = "https://gxdijcyjambxhigzxfgf.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4ZGlqY3lqYW1ieGhpZ3p4ZmdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyODYyMjMsImV4cCI6MjA4Nzg2MjIyM30.S5Rq_I0ujdUKrrSoaWedt7NtTLp6mQ2N4efoxwaU3uI";
+// ─── SUPABASE INIT (Doc1 keys) ────────────────────────────────
+const SUPABASE_URL      = "https://yhvnbwwxlkbccishcuue.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlodm5id3d4bGtiY2Npc2hjdXVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjIyODksImV4cCI6MjA4ODE5ODI4OX0.F4TFa8Bh6APz25gasQN8JvGwcx5QZyTqr-UZxMUIug0";
+const SITE_URL          = "https://elite-dance-production.up.railway.app";
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -543,6 +481,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     }
 });
 
+// ─── AUTH UI ──────────────────────────────────────────────────
 function updateAuthUI(session) {
     const loginWrap   = document.getElementById('login-btn-wrap');
     const userDisplay = document.getElementById('user-display');
@@ -570,10 +509,11 @@ function prefillForm(user) {
     document.getElementById('email').value = user.email || '';
 }
 
+// ─── GOOGLE SIGN IN (Doc1 SITE_URL) ──────────────────────────
 async function signInWithGoogle() {
     const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/' }
+        options: { redirectTo: SITE_URL + '/' }
     });
     if (error) alert('Sign-in error: ' + error.message);
 }
@@ -586,6 +526,7 @@ async function signOut() {
     if (error) console.error('Sign-out error:', error.message);
 }
 
+// ─── MENTOR REQUEST (/mentor-request route) ───────────────────
 async function submitMentorRequest() {
     const name    = document.getElementById('mentor-name').value.trim();
     const email   = document.getElementById('mentor-email').value.trim();
@@ -678,7 +619,7 @@ function closeEnroll() {
 }
 function switchToEnroll() { closeDetails(); showEnroll(); }
 
-// ─── ENROLL FORM SUBMIT ───────────────────────────────────────
+// ─── ENROLL FORM (Doc1 phone + age validation) ────────────────
 document.getElementById('enrollmentForm').onsubmit = async (e) => {
     e.preventDefault();
     const msg = document.getElementById('status-msg');
@@ -689,18 +630,37 @@ document.getElementById('enrollmentForm').onsubmit = async (e) => {
         setTimeout(() => { closeEnroll(); document.getElementById('auth-gate').classList.remove('hidden'); }, 1500);
         return;
     }
+
+    // ✅ Phone validation (Doc1)
+    const phoneVal = document.getElementById('phone').value.trim();
+    if (!/^\d{10}$/.test(phoneVal)) {
+        msg.style.color = 'red';
+        msg.innerText = 'Phone number must be exactly 10 digits.';
+        return;
+    }
+
+    // ✅ Age validation (Doc1)
+    const ageVal = document.getElementById('age').value;
+    if (ageVal && (parseInt(ageVal) < 1 || parseInt(ageVal) > 99)) {
+        msg.style.color = 'red';
+        msg.innerText = 'Please enter a valid age between 1 and 99.';
+        return;
+    }
+
     msg.style.color = '#aaa';
     msg.innerText   = 'Processing...';
+
     const payload = {
-        name:             document.getElementById('name').value,
-        email:            document.getElementById('email').value,
-        phone:            document.getElementById('phone').value,
-        age:              document.getElementById('age').value ? parseInt(document.getElementById('age').value) : null,
+        name:             document.getElementById('name').value.trim(),
+        email:            document.getElementById('email').value.trim(),
+        phone:            phoneVal,
+        age:              ageVal ? parseInt(ageVal) : null,
         dance_style:      document.getElementById('dance_style').value,
         experience_level: document.getElementById('experience_level').value
     };
+
     try {
-        const res    = await fetch('/enroll', {
+        const res = await fetch('/enroll', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
             body:    JSON.stringify(payload)
@@ -708,8 +668,8 @@ document.getElementById('enrollmentForm').onsubmit = async (e) => {
         const result = await res.json();
         if (res.ok) {
             msg.style.color = '#00f2ff';
-            msg.innerText   = 'Welcome to the Academy! 🎉';
-            setTimeout(() => { document.getElementById('enrollmentForm').reset(); msg.innerText = ''; closeEnroll(); }, 3000);
+            msg.innerText   = '🎉 Welcome to the Academy! Check your email for confirmation.';
+            setTimeout(() => { document.getElementById('enrollmentForm').reset(); msg.innerText = ''; closeEnroll(); }, 3500);
         } else {
             msg.style.color = 'red';
             msg.innerText   = result.error || 'Submission failed. Please try again.';
@@ -719,6 +679,14 @@ document.getElementById('enrollmentForm').onsubmit = async (e) => {
         msg.innerText   = 'Server error. Try again.';
     }
 };
+
+// ─── CLOSE MODALS ON BACKDROP CLICK ──────────────────────────
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDetails();
+});
+document.getElementById('enroll-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeEnroll();
+});
 
 // ─── SMOOTH SCROLL ───────────────────────────────────────────
 document.querySelectorAll('a[href^="#"]').forEach(link => {
