@@ -344,9 +344,9 @@
         </div>
         <form id="mentorForm" class="glass p-6 md:p-8 rounded-3xl space-y-4 border-t-4 border-pink-500">
             <h4 class="text-lg md:text-xl font-bold mb-2">Request a Trial Class</h4>
-            <input type="text" id="mentor-name" placeholder="Your Name" required class="p-4 rounded-xl outline-none">
-            <input type="email" id="mentor-email" placeholder="Email Address" required class="p-4 rounded-xl outline-none">
-            <textarea id="mentor-message" placeholder="Tell us about your dance goals..." rows="4" class="p-4 rounded-xl outline-none"></textarea>
+            <input type="text"  id="mentor-name"    placeholder="Your Name"                        required class="p-4 rounded-xl outline-none">
+            <input type="email" id="mentor-email"   placeholder="Email Address"                    required class="p-4 rounded-xl outline-none">
+            <textarea           id="mentor-message" placeholder="Tell us about your dance goals..." rows="4"  class="p-4 rounded-xl outline-none"></textarea>
             <button type="button" onclick="submitMentorRequest()" class="btn-neon w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm">Connect with a Mentor</button>
             <p id="mentor-status" class="text-center text-sm font-bold mt-2"></p>
         </form>
@@ -444,7 +444,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// ─── SUPABASE INIT (Doc1 keys) ────────────────────────────────
+// ─── SUPABASE INIT ────────────────────────────────────────────
 const SUPABASE_URL      = "https://yhvnbwwxlkbccishcuue.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlodm5id3d4bGtiY2Npc2hjdXVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjIyODksImV4cCI6MjA4ODE5ODI4OX0.F4TFa8Bh6APz25gasQN8JvGwcx5QZyTqr-UZxMUIug0";
 const SITE_URL          = "https://elite-dance-production.up.railway.app";
@@ -509,7 +509,7 @@ function prefillForm(user) {
     document.getElementById('email').value = user.email || '';
 }
 
-// ─── GOOGLE SIGN IN (Doc1 SITE_URL) ──────────────────────────
+// ─── GOOGLE SIGN IN ───────────────────────────────────────────
 async function signInWithGoogle() {
     const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
@@ -526,51 +526,55 @@ async function signOut() {
     if (error) console.error('Sign-out error:', error.message);
 }
 
-// ─── MENTOR REQUEST (/mentor-request route) ───────────────────
+// ─── MENTOR REQUEST ───────────────────────────────────────────
+// FIX: validates all 3 fields — name, email AND message
 async function submitMentorRequest() {
     const name    = document.getElementById('mentor-name').value.trim();
     const email   = document.getElementById('mentor-email').value.trim();
     const message = document.getElementById('mentor-message').value.trim();
     const status  = document.getElementById('mentor-status');
-    if (!name || !email) {
+
+    if (!name || !email || !message) {
         status.style.color = 'red';
-        status.innerText = 'Please fill in your name and email.';
+        status.innerText   = 'Please fill in all fields.';
         return;
     }
+
     status.style.color = '#aaa';
-    status.innerText = 'Sending...';
+    status.innerText   = 'Sending...';
+
     try {
         const res = await fetch('/mentor-request', {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, message })
+            body:    JSON.stringify({ name, email, message })
         });
         const result = await res.json();
         if (res.ok) {
             status.style.color = '#00f2ff';
-            status.innerText = result.message;
+            status.innerText   = result.message || '✅ Message sent! A mentor will contact you soon.';
             document.getElementById('mentorForm').reset();
         } else {
             status.style.color = 'red';
-            status.innerText = result.error || 'Something went wrong.';
+            status.innerText   = result.error || 'Something went wrong.';
         }
     } catch (err) {
         status.style.color = 'red';
-        status.innerText = 'Server error. Try again.';
+        status.innerText   = 'Server error. Try again.';
     }
 }
 
 // ─── DANCE DATA ───────────────────────────────────────────────
 const danceData = {
     Bharatanatyam: { icon:'🕉️', accent:'accent-bharatanatyam', fee:'₹2,500/mo', bg:'/static/bharatanatyam.jpeg', desc:'A major form of Indian classical dance that originated in Tamil Nadu. Known for its fixed upper torso, bent legs, and flexed knees combined with spectacular footwork.', mastery:['Hand Gestures (Mudras)','Facial Expressions (Abhinaya)','Rhythmic Patterns (Tala)','Traditional Arangetram Prep'] },
-    'Hip Hop':     { icon:'👟', accent:'accent-hiphop',        fee:'₹3,000/mo', bg:'/static/hiphop.jpeg',        desc:'Vibrant street dance styles primarily performed to hip-hop music. Covers foundation of urban movement and personal freestyle expression.', mastery:['Popping & Locking','Breaking Foundations','Choreography Memory','Freestyle Battle Tactics'] },
-    Kathak:        { icon:'🌪️', accent:'accent-kathak',        fee:'₹2,800/mo', bg:'/static/kathak.jpeg',        desc:'Hailing from Northern India, Kathak emphasizes rhythmic foot movements adorned with small bells (Ghungroo), harmonized to music.', mastery:['Complex Footwork (Tatkar)','Rapid Spins (Chakkars)','Storytelling Narratives','Mathematical Rhythm'] },
-    Salsa:         { icon:'💃', accent:'accent-salsa',         fee:'₹3,500/mo', bg:'/static/salsa.png',          desc:'A popular form of social dance from the Caribbean. High energy, spicy, and focused on the connection between partners.', mastery:['Lead & Follow Dynamics','Latin Body Roll','Cross Body Lead','Spin Technique'] },
-    Contemporary:  { icon:'🎭', accent:'accent-contemporary',  fee:'₹3,200/mo', bg:'/static/contemporary.png',   desc:'An expressive style combining modern, jazz, lyrical, and classical ballet elements.', mastery:['Floor Work','Weight Release','Emotional Expression','Cunningham & Graham Techniques'] },
-    Ballet:        { icon:'🩰', accent:'accent-ballet',        fee:'₹4,000/mo', bg:'/static/ballet.png',         desc:'The foundation of all dance styles. Develops poise, discipline, and physical strength through highly formalized steps.', mastery:['Barre Technique','Plié & Tendu Alignment','Center Adagio','Pointe Work Foundations'] },
-    Western:       { icon:'🎷', accent:'accent-western',       fee:'₹3,000/mo', bg:'/static/western.jpeg',       desc:'Sharp, energetic, and theatrical. Built on Western pop and Broadway tradition with dynamic stage presence.', mastery:['Sharp Isolations','Leaps & Kicks','Pirouettes','Performance Charisma'] },
-    Kuchipudi:     { icon:'✨', accent:'accent-kuchipudi',     fee:'₹2,500/mo', bg:'/static/kuchipudi.png',      desc:'One of the eight major Indian classical dances — a dance-drama rooted in the ancient Natya Shastra.', mastery:['Tarangam (Dancing on plate)','Dramatic Speech','Symmetry & Grace','Classical Literature'] },
-    Freestyle:     { icon:'🌀', accent:'accent-freestyle',     fee:'₹2,800/mo', bg:'/static/freestyle.jpeg',     desc:'Unrestricted, expressive movement drawn from multiple dance styles. Build your own unique performance identity.', mastery:['Improvisation','Style Fusion','Stage Confidence','Personal Choreography'] }
+    'Hip Hop':     { icon:'👟', accent:'accent-hiphop',         fee:'₹3,000/mo', bg:'/static/hiphop.jpeg',         desc:'Vibrant street dance styles primarily performed to hip-hop music. Covers foundation of urban movement and personal freestyle expression.', mastery:['Popping & Locking','Breaking Foundations','Choreography Memory','Freestyle Battle Tactics'] },
+    Kathak:        { icon:'🌪️', accent:'accent-kathak',         fee:'₹2,800/mo', bg:'/static/kathak.jpeg',         desc:'Hailing from Northern India, Kathak emphasizes rhythmic foot movements adorned with small bells (Ghungroo), harmonized to music.', mastery:['Complex Footwork (Tatkar)','Rapid Spins (Chakkars)','Storytelling Narratives','Mathematical Rhythm'] },
+    Salsa:         { icon:'💃', accent:'accent-salsa',          fee:'₹3,500/mo', bg:'/static/salsa.png',           desc:'A popular form of social dance from the Caribbean. High energy, spicy, and focused on the connection between partners.', mastery:['Lead & Follow Dynamics','Latin Body Roll','Cross Body Lead','Spin Technique'] },
+    Contemporary:  { icon:'🎭', accent:'accent-contemporary',   fee:'₹3,200/mo', bg:'/static/contemporary.png',    desc:'An expressive style combining modern, jazz, lyrical, and classical ballet elements.', mastery:['Floor Work','Weight Release','Emotional Expression','Cunningham & Graham Techniques'] },
+    Ballet:        { icon:'🩰', accent:'accent-ballet',         fee:'₹4,000/mo', bg:'/static/ballet.png',          desc:'The foundation of all dance styles. Develops poise, discipline, and physical strength through highly formalized steps.', mastery:['Barre Technique','Plié & Tendu Alignment','Center Adagio','Pointe Work Foundations'] },
+    Western:       { icon:'🎷', accent:'accent-western',        fee:'₹3,000/mo', bg:'/static/western.jpeg',        desc:'Sharp, energetic, and theatrical. Built on Western pop and Broadway tradition with dynamic stage presence.', mastery:['Sharp Isolations','Leaps & Kicks','Pirouettes','Performance Charisma'] },
+    Kuchipudi:     { icon:'✨', accent:'accent-kuchipudi',      fee:'₹2,500/mo', bg:'/static/kuchipudi.png',       desc:'One of the eight major Indian classical dances — a dance-drama rooted in the ancient Natya Shastra.', mastery:['Tarangam (Dancing on plate)','Dramatic Speech','Symmetry & Grace','Classical Literature'] },
+    Freestyle:     { icon:'🌀', accent:'accent-freestyle',      fee:'₹2,800/mo', bg:'/static/freestyle.jpeg',      desc:'Unrestricted, expressive movement drawn from multiple dance styles. Build your own unique performance identity.', mastery:['Improvisation','Style Fusion','Stage Confidence','Personal Choreography'] }
 };
 
 const grid        = document.getElementById('dance-grid');
@@ -619,7 +623,7 @@ function closeEnroll() {
 }
 function switchToEnroll() { closeDetails(); showEnroll(); }
 
-// ─── ENROLL FORM (Doc1 phone + age validation) ────────────────
+// ─── ENROLL FORM ──────────────────────────────────────────────
 document.getElementById('enrollmentForm').onsubmit = async (e) => {
     e.preventDefault();
     const msg = document.getElementById('status-msg');
@@ -631,19 +635,17 @@ document.getElementById('enrollmentForm').onsubmit = async (e) => {
         return;
     }
 
-    // ✅ Phone validation (Doc1)
     const phoneVal = document.getElementById('phone').value.trim();
     if (!/^\d{10}$/.test(phoneVal)) {
         msg.style.color = 'red';
-        msg.innerText = 'Phone number must be exactly 10 digits.';
+        msg.innerText   = 'Phone number must be exactly 10 digits.';
         return;
     }
 
-    // ✅ Age validation (Doc1)
     const ageVal = document.getElementById('age').value;
     if (ageVal && (parseInt(ageVal) < 1 || parseInt(ageVal) > 99)) {
         msg.style.color = 'red';
-        msg.innerText = 'Please enter a valid age between 1 and 99.';
+        msg.innerText   = 'Please enter a valid age between 1 and 99.';
         return;
     }
 
