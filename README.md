@@ -159,13 +159,10 @@ elite-dance-academy/
 
 ## 👥 Authors
 
-This project was collaboratively built by:
-
-| Name | Role |
+| Name | LinkedIn |
 |---|---|
-| **Mallipudi Sri Sri Meher Nayana** | Full Stack Developer |
-| **Peruri Vinay** | Full Stack Developer |
-| **Shaik Ismail** | Frontend Developer & Tester |
+| **PERURI VINAY** | [www.linkedin.com/in/vinay-peruri-97a399365](https://www.linkedin.com/in/vinay-peruri-97a399365) |
+
 
 ---
 
